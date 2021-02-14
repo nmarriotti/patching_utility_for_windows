@@ -11,7 +11,7 @@ Edit _manifest.cfg_ and include a list of files and/or folders to include in the
 The manifest file contains MD5 hash values and source/destinations locations such as where each file resides in the patch and where it belongs on the file system.
 
 ```
-./patch -Build
+./patch.ps1 -Build
 ```
 
 ### Deploy
