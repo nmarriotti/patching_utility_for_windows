@@ -85,7 +85,7 @@ Function Build()
     # cleanup
     Remove-Item $MANIFEST -Force -ErrorAction SilentlyContinue
     Remove-Item $PATCHED_FILES_DIR -Recurse -Force -ErrorAction SilentlyContinue
-    New-Item -Path $PATCHED_FILES_DIR -ItemType directory -Force
+    New-Item -Path $PATCHED_FILES_DIR -ItemType directory -Force | Out-Null
 
     # create empty manifest file
     New-Item -Path $MANIFEST -ItemType File | Out-Null
@@ -102,7 +102,7 @@ Function Build()
 
             # Find subfolders
             $subfolders = Get-ChildItem -Path $dest -Recurse -Directory -Force
-            
+
             # Add any files in this top-level directory
             AddFilesToManifest -Path $dest
 
