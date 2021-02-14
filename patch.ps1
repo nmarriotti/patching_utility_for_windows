@@ -42,7 +42,12 @@ Function WriteManifestLine()
     
     # copy files/folders to patch directory
     New-Item -Path $(Split-Path -Path $src) -ItemType directory -ErrorAction SilentlyContinue | Out-Null
-    Copy-Item -Path $Dest -Destination $src
+    
+    if(-Not (Test-Path -Path $Dest -PathType Container))
+    {
+        Copy-Item -Path $Dest -Destination $src
+    }
+    
     
     if(-Not $md5)
     {
