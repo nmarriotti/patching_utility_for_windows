@@ -42,7 +42,7 @@ Function WriteManifestLine()
     
     # copy files/folders to patch directory
     New-Item -Path $(Split-Path -Path $src) -ItemType directory -ErrorAction SilentlyContinue | Out-Null
-    Copy-Item -Path $dest -Destination $src -Force
+    Copy-Item -Path $Dest -Destination $src
     
     if(-Not $md5)
     {
@@ -130,7 +130,7 @@ Function ApplyPatches()
     echo "Checking files..."
 
     # Read each line in manifest
-    $_manifest = Import-CSV -Path C:\Users\nmarr\Desktop\Windows-Patching\manifest
+    $_manifest = Import-CSV -Path $MANIFEST -ErrorAction Stop
     
     # Iterate over each item
     foreach($item in $_manifest)
