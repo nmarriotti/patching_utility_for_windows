@@ -152,6 +152,12 @@ Function Build()
 
 Function ApplyPatches()
 {
+    # Make sure manifest exists
+    if(-Not (Test-Path -Path $MANIFEST -PathType Leaf))
+    {
+        Write-Host "ERROR: Manifest file not found."
+        return
+    }
     # Create backup directory
     New-Item -Path $BACKUP_DIR -ItemType directory -ErrorAction SilentlyContinue | Out-Null
 
@@ -242,6 +248,13 @@ Function Backup()
 
 Function Restore()
 {
+    # Make sure manifest exists
+    if(-Not (Test-Path -Path $MANIFEST -PathType Leaf))
+    {
+        Write-Host "ERROR: Manifest file not found."
+        return
+    }
+
     $num_restored = 0
     Write-Host "restoring..."
 
