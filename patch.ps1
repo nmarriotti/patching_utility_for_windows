@@ -84,7 +84,7 @@ Function WriteManifestLine()
 Function Build()
 {
     # remove backup directory
-    Remove-Item -Path $BACKUP_DIR -Force -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+    Remove-Item -Path $BACKUP_DIR -Force -Recurse -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
 
     # Count number of files included in this patch
     $num_files = 0
@@ -95,13 +95,15 @@ Function Build()
             [Parameter(Mandatory=$true)]
             [String]$Path
         )
+        $i = 0
         # Find all files in a folder
         $files = Get-ChildItem -Path $Path -Recurse -File -Force
         foreach($file in $files)
         {
             WriteManifestLine -Dest $file.FullName
-            $num_files += 1
+            $i += 1
         }
+        return $i
     }
 
     Write-Host "Building manifest..."
@@ -130,7 +132,7 @@ Function Build()
             $subfolders = Get-ChildItem -Path $dest -Recurse -Directory -Force
 
             # Add any files in this top-level directory
-            AddFilesToManifest -Path $dest
+            $num_files += $(AddFilesToManifest -Path $dest)
 
             foreach($folder in $subfolders)
             {
