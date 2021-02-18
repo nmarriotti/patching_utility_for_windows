@@ -28,17 +28,19 @@ Function BuildPath()
     param (
         [Parameter(Mandatory=$true)]
         [String]$Path,
-        [Parameter(Mandatory=$true)]
-        [String]$Base
+        [Parameter(Mandatory=$false)]
+        [String]$Base=""
     )
 
     $parts = $Path -split "\\"
     $output = $parts[1..$parts.Count] -join '\'
 
     # This is where the patch will be stored
-    $patch_path = "$Base\$output"
-
-    return $patch_path
+    if($Base)
+    {
+        return "$Base\$output"
+    }
+    return $output
 }
 
 
@@ -57,6 +59,8 @@ Function WriteManifestLine()
     $md5 = Get-FileHash -Algorithm MD5 -Path $Dest
     # get absolute path where data will be stored in patch
     $src = BuildPath -Path $Dest -Base $PATCHED_FILES_DIR
+    # partial path that is written to manifest
+    $partial_source = BuildPath -Path $Dest
     
     # copy files/folders to patch directory
     New-Item -Path $(Split-Path -Path $src) -ItemType directory -ErrorAction SilentlyContinue | Out-Null
@@ -77,7 +81,7 @@ Function WriteManifestLine()
     }
 
     # Write line to manifest
-    Add-Content -Path $MANIFEST -Value "$md5,$src,$Dest"
+    Add-Content -Path $MANIFEST -Value "$md5,$partial_source,$Dest"
 }
 
 
@@ -172,8 +176,11 @@ Function ApplyPatches()
     # Iterate over each item
     foreach($item in $_manifest)
     {
+        # Add absolute path
+        $source = "$PATCHED_FILES_DIR\$($item.Source)"
+
         # Check if this item is a directory
-        if(Test-Path -Path $item.Source -PathType Container)
+        if(Test-Path -Path $source -PathType Container)
         {
             # Check if it exists on the file system
             if(Test-Path -Path $item.Destination -PathType Container)
@@ -187,7 +194,7 @@ Function ApplyPatches()
             }
             
         }
-        elseif(Test-Path $item.Source -PathType Leaf)
+        elseif(Test-Path $source -PathType Leaf)
         {
             # This is a file, check if it exists on the file system
             if(Test-Path $item.Destination -PathType Leaf)
@@ -198,9 +205,10 @@ Function ApplyPatches()
                 if(-Not ($item.Hash -match $currentHash.Hash))
                 {
                     # Hash mismatch, replace the file
+                    Write-Host "Source: $source"
                     Backup -Dest $item.Destination     # first backup the file!
                     Write-Host "patching file $($item.Destination)"
-                    Copy-Item -Path $item.Source -Destination $item.Destination -Force
+                    Copy-Item -Path $source -Destination $item.Destination -Force
                     $num_patched += 1
                 }
             }
@@ -216,7 +224,7 @@ Function ApplyPatches()
                     New-Item -Path $path_to_create -ItemType directory | Out-Null
                 }
                 
-                Copy-Item -Path $item.Source $item.Destination -Force
+                Copy-Item -Path $source $item.Destination -Force
                 $num_patched += 1
             }
         }

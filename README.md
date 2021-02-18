@@ -21,4 +21,3 @@ If a file needs to be patched, a backup of the original file is taken.
 ### Restore
 
 MD5 hashes of the backed up file and the currently deployed file. If there are discrepancies then the file will be restored from the backup.
-
